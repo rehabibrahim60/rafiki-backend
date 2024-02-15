@@ -4,6 +4,7 @@ const auth_util = require('../utils/auth_util');
 const path = require('path');
 const { sendEmail } = require('../services/Mail');
 const { FRONTEND_URL } = require('../config/config');
+const { validationResult } = require('express-validator');
 
 function checkMissingFields(required) {
 	missing_fields = [];
@@ -33,6 +34,11 @@ exports.register = async (req, res, next) => {
 			res.status(400).json({ success: false, message: 'No data provided' });
 			return;
 		}
+                const errors = validationResult(req)
+                if (!errors.isEmpty()) {
+                 return res.status(403).json({success: false ,message: 'Invalid data.' ,errors: errors.array()})
+                }
+                 
 		const { UserName, Password, Email, Role_Id, Date_Of_Birth, FirstName, LastName } = req.body;
 		const required = { UserName, Password, Email, Role_Id, Date_Of_Birth, FirstName, LastName };
 		const missing_fields = checkMissingFields(required);
